@@ -1,0 +1,151 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    background: #004a7e;
+}
+
+main{ 
+    margin-left: 20px; 
+    margin-right: 20px; 
+} 
+
+.title {
+    display: flex;
+    justify-content: center;
+}
+
+.navbar ul{ 
+    list-style-type: none; 
+    background: linear-gradient(180deg, #002863 0%, #001637 100%);
+    padding: 0px; 
+    margin: 0px; 
+    overflow: hidden; 
+} 
+
+.navbar a{ 
+    color: white; 
+    text-decoration: none; 
+    padding: 15px;
+    display: block;
+    text-align: center;
+}
+
+.navbar a:hover{
+    background: #ffffff1a; 
+}
+
+.navbar li{
+    float: left;
+}
+
+.webcontent {
+    background: #004a7e;
+    color: #eaf1f8;
+    text-align: center;
+    padding: 18px;
+}
+
+.title {
+    background: linear-gradient(180deg, #005fa2 0%, #00355a 50%);
+    padding: 10px;
+    color: #fff;
+}
+
+.webcontent h3 {
+    margin-top: 10px;
+    color: #d8e8f7;
+    text-shadow: 0 1px 2px #00111d;
+}
+
+pre {
+    background: #000b14;
+    color: #eaf1f8;
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    overflow-y: auto;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 400px;
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff #000b14;
+}
+
+pre::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+pre::-webkit-scrollbar-track {
+    background: #000b14;
+    border-radius: 6px;
+}
+
+pre::-webkit-scrollbar-thumb {
+    background: #ffffff;
+    border: 2px solid #000b14;
+    border-radius: 6px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+    background: #ffffff;
+}
+
+@media (max-width: 600px) {
+    .logo img {
+        max-width: 100%;
+        height: auto;
+    }
+    iframe {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 16 / 9;
+        height: auto;
+    }
+}
+
+@media (max-width: 836px) {
+    .logo img {
+        max-width: 100%;
+        height: auto;
+    }
+    iframe {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 16 / 9;
+        height: auto;
+    }
+}
+
+.copyBtn {
+    border-radius: 7px;
+    padding: 7px;
+    border: none;
+    color: white;
+    background: linear-gradient(180deg, rgb(0, 250, 0), green);
+    border: 2px solid green;
+    font: inherit;
+    cursor: pointer;
+}
+
+.copyBtn:hover {
+    background: rgb(0, 159, 0);
+}
+
+a:not(.navbar a) {
+    color: #00d9ff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s ease;
+}
+
+a:hover:not(.navbar a) {
+    color: rgb(109, 240, 255);
+}
+
+a:focus-visible:not(.navbar a) {
+    outline: 2px solid rgb(91, 228, 255);
+    outline-offset: 3px;
+}

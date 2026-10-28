@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <title>Video</title>
+    <link rel="stylesheet" href="src/video-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.2.0/css/all.min.css">
+    <style>
+        * {
+            scrollbar-width: thick;
+            scrollbar-color: #006ebc #002e50;
+        }
+
+        *::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: #006ebc;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: #006ebc;
+            border: 2px solid #002e50;
+            border-radius: 7px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: #006ebc;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="video-stage">
+            <video src="https://static.yooco.de/n2/f2/812437/u/77/3931817/videos/1c401e4c2593b6aa4e62b896ecb10453.mp4" id="video-custom-player" ></video>
+            <div class="video-overlay" id="video-overlay"></div>
+            <img src="assets/Spinner@1x-1.0s-200px-200px.gif" class="video-loader" id="video-loader" width="70" height="70">
+            <button class="replay" id="replay-button"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+        <div class="controls">
+            <div class="vid-controls-left">
+                <button class="play-btn" id="play-button"><i class="fas fa-play"></i></button>
+                    <div class="timestamp">
+                    <span id="current-time">0:08</span>
+                    <span> / </span>
+                    <span id="end-time">0:08</span>
+                </div>
+            </div>
+            <div class="vid-controls-center">
+                <input type="range" id="seek-slider" min="0" max="100" value="50" step="any" class="vid-slider">
+            </div>
+            <div class="vid-controls-right">
+                <span><i class="fa-solid fa-volume-high"></i></span>
+                <input type="range" id="volume-control" class="volume-slider">
+                <button class="fullscreen-btn" id="fullscreen-button"><i class="fa-solid fa-expand"></i></button>
+                <button class="picture-in-picture-btn" id="picture-in-picture-button"><i class="fa-solid fa-picture-in-picture"></i></button>
+            </div>
+            <div class="playback-speed">
+                <label for="playback-speed"><i class="fa-solid fa-gauge-high"></i></label>
+                <select id="playback-speed">
+                    <option value="0.25">0.25×</option>
+                    <option value="0.5">0.5×</option>
+                    <option value="0.75">0.75×</option>
+                    <option value="1" selected>1×</option>
+                    <option value="1.25">1.25×</option>
+                    <option value="1.5">1.5×</option>
+                    <option value="2">2×</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <script src="src/video-player.js" defer></script>
+</body>
+</html>
