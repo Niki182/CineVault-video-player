@@ -302,7 +302,7 @@ document.querySelectorAll('.video-container').forEach((container) => {
         videoPlayer.controls = false;
     }
     
-    const videoPlayerVersion = '1.0.0';
+    const videoPlayerVersion = '1.0.1';
     const videoPlayerName = 'CineVault';
     const videoContextMenu = document.createElement('div');
     videoContextMenu.setAttribute('role', 'menu');
@@ -352,7 +352,7 @@ document.querySelectorAll('.video-container').forEach((container) => {
         divider.style.cssText = 'height:1px;margin:5px 4px;background:rgba(255,255,255,.2);';
         videoContextMenu.appendChild(divider);
         addMenuItem('Loop', () => { videoPlayer.loop = !videoPlayer.loop; }, videoPlayer.loop);
-        addMenuItem('Show controls', () => {
+        addMenuItem('Show all controls', () => {
             if (customControls) {
                 customControlsVisible = !customControlsVisible;
                 customControls.hidden = !customControlsVisible;
@@ -366,6 +366,22 @@ document.querySelectorAll('.video-container').forEach((container) => {
             }
             updateFullscreenVideoSize();
         }, customControls ? customControlsVisible : videoPlayer.controls);
+        addMenuItem('Download video', () => {
+            const source = videoPlayer.currentSrc || videoPlayer.src;
+            if (!source) return;
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = source;
+            try {
+                const pathname = new URL(source, document.baseURI).pathname;
+                downloadLink.download = decodeURIComponent(pathname.split('/').pop()) || 'video';
+            } catch (error) {
+                downloadLink.download = 'video';
+            }
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            downloadLink.remove();
+        });
         const bottomDivider = document.createElement('div');
         bottomDivider.style.cssText = 'height:1px;margin:5px 4px;background:rgba(255,255,255,.2);';
         videoContextMenu.appendChild(bottomDivider);
