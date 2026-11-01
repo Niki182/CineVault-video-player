@@ -436,7 +436,7 @@ document.querySelectorAll('.video-container').forEach((container) => {
         }
         const link = document.createElement('a');
         link.href = videoSrc;
-        link.download = 'video.mp4';
+        link.download = decodeURIComponent(new URL(videoSrc, document.baseURI).pathname.split('/').pop()) || 'video.mp4';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
