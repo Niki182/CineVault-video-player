@@ -14,7 +14,10 @@ document.querySelectorAll('.video-container').forEach((container) => {
     const volumeSlider = container.querySelector('.volume-slider');
     const playbackSpeed = container.querySelector('#playback-speed');
     const customControls = container.querySelector('.controls');
-    
+    const moreOptionsButton = container.querySelector('#more-options-button');
+    const moreOptionsMenu = container.querySelector('#more-options-menu');
+    const downloadButton = container.querySelector('#download-btn');
+
     const controlsDisplay = customControls ? window.getComputedStyle(customControls).display : '';
     let customControlsVisible = customControls
         ? !customControls.hidden && controlsDisplay !== 'none'
@@ -302,7 +305,7 @@ document.querySelectorAll('.video-container').forEach((container) => {
         videoPlayer.controls = false;
     }
     
-    const videoPlayerVersion = '1.0.1';
+    const videoPlayerVersion = '1.0.4';
     const videoPlayerName = 'CineVault';
     const videoContextMenu = document.createElement('div');
     videoContextMenu.setAttribute('role', 'menu');
@@ -366,22 +369,6 @@ document.querySelectorAll('.video-container').forEach((container) => {
             }
             updateFullscreenVideoSize();
         }, customControls ? customControlsVisible : videoPlayer.controls);
-        addMenuItem('Download video', () => {
-            const source = videoPlayer.currentSrc || videoPlayer.src;
-            if (!source) return;
-
-            const downloadLink = document.createElement('a');
-            downloadLink.href = source;
-            try {
-                const pathname = new URL(source, document.baseURI).pathname;
-                downloadLink.download = decodeURIComponent(pathname.split('/').pop()) || 'video';
-            } catch (error) {
-                downloadLink.download = 'video';
-            }
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            downloadLink.remove();
-        });
         const bottomDivider = document.createElement('div');
         bottomDivider.style.cssText = 'height:1px;margin:5px 4px;background:rgba(255,255,255,.2);';
         videoContextMenu.appendChild(bottomDivider);
@@ -405,7 +392,56 @@ document.querySelectorAll('.video-container').forEach((container) => {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') closeVideoContextMenu();
     });
-    
+
+    let moreOptionsTransitionTimeout;
+    const setMoreOptionsMenuOpen = (open) => {
+        window.clearTimeout(moreOptionsTransitionTimeout);
+        if (open) {
+            moreOptionsMenu.hidden = false;
+            moreOptionsMenu.style.opacity = '0';
+            moreOptionsMenu.style.transform = 'translateY(4px)';
+            requestAnimationFrame(() => {
+                moreOptionsMenu.style.opacity = '1';
+                moreOptionsMenu.style.transform = 'translateY(0)';
+            });
+        } else {
+            moreOptionsMenu.style.opacity = '0';
+            moreOptionsMenu.style.transform = 'translateY(4px)';
+            moreOptionsTransitionTimeout = window.setTimeout(() => {
+                moreOptionsMenu.hidden = true;
+            }, 180);
+        }
+        moreOptionsButton.setAttribute('aria-expanded', String(open));
+    };
+    moreOptionsMenu.style.transition = 'opacity 180ms ease, transform 180ms ease';
+    moreOptionsMenu.hidden = true;
+    moreOptionsButton.setAttribute('aria-expanded', 'false');
+
+    moreOptionsButton.addEventListener('click', () => {
+        setMoreOptionsMenuOpen(moreOptionsMenu.hidden);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !moreOptionsMenu.hidden) {
+            setMoreOptionsMenuOpen(false);
+            moreOptionsButton.focus();
+        }
+    });
+
+    downloadButton.addEventListener('click', () => {
+        const videoSrc = videoPlayer.currentSrc || videoPlayer.src;
+        if (!videoSrc) {
+            console.warn('No video source available for download.');
+            return;
+        }
+        const link = document.createElement('a');
+        link.href = videoSrc;
+        link.download = 'video.mp4';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
     videoPlayer.addEventListener('timeupdate', updateTimes);
     videoPlayer.addEventListener('loadedmetadata', updateTimes);
     videoPlayer.addEventListener('durationchange', updateTimes);
