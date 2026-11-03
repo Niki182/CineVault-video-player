@@ -17,6 +17,7 @@ document.querySelectorAll('.video-container').forEach((container) => {
     const moreOptionsButton = container.querySelector('#more-options-button');
     const moreOptionsMenu = container.querySelector('#more-options-menu');
     const downloadButton = container.querySelector('#download-btn');
+    const subtitlesButton = container.querySelector('#subtitles-btn');
 
     const controlsDisplay = customControls ? window.getComputedStyle(customControls).display : '';
     let customControlsVisible = customControls
@@ -305,7 +306,7 @@ document.querySelectorAll('.video-container').forEach((container) => {
         videoPlayer.controls = false;
     }
     
-    const videoPlayerVersion = '1.0.4';
+    const videoPlayerVersion = '1.0.7';
     const videoPlayerName = 'CineVault';
     const videoContextMenu = document.createElement('div');
     videoContextMenu.setAttribute('role', 'menu');
@@ -441,6 +442,43 @@ document.querySelectorAll('.video-container').forEach((container) => {
         link.click();
         document.body.removeChild(link);
     });
+
+    const getSubtitleTracks = () => Array.from(videoPlayer.textTracks).filter((textTrack) => {
+        if (textTrack.kind !== 'subtitles' && textTrack.kind !== 'captions') return false;
+        const trackElement = Array.from(videoPlayer.querySelectorAll('track')).find((track) =>
+            track.track === textTrack
+        );
+        return Boolean(trackElement && trackElement.src && /\.vtt(?:$|[?#])/i.test(trackElement.src));
+    });
+    
+    const updateSubtitlesButton = () => {
+        if (!subtitlesButton) return;
+        const tracks = getSubtitleTracks();
+        subtitlesButton.style.display = tracks.length > 0 ? '' : 'none';
+        subtitlesButton.disabled = tracks.length === 0;
+        const isShowing = tracks.some((track) => track.mode === 'showing');
+        subtitlesButton.setAttribute('aria-pressed', String(isShowing));
+        subtitlesButton.setAttribute('aria-label', isShowing ? 'Turn subtitles off' : 'Turn subtitles on');
+    };
+
+    getSubtitleTracks().forEach((track) => {
+        track.mode = 'disabled';
+    });
+
+    if (subtitlesButton) {
+        subtitlesButton.addEventListener('click', () => {
+            const tracks = getSubtitleTracks();
+            const shouldShow = !tracks.some((track) => track.mode === 'showing');
+            tracks.forEach((track) => {
+                track.mode = shouldShow ? 'showing' : 'disabled';
+            });
+            updateSubtitlesButton();
+        });
+        videoPlayer.addEventListener('loadedmetadata', updateSubtitlesButton);
+        videoPlayer.textTracks.addEventListener('addtrack', updateSubtitlesButton);
+        videoPlayer.textTracks.addEventListener('change', updateSubtitlesButton);
+        updateSubtitlesButton();
+    }
 
     videoPlayer.addEventListener('timeupdate', updateTimes);
     videoPlayer.addEventListener('loadedmetadata', updateTimes);
