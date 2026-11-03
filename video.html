@@ -36,7 +36,9 @@
 <body>
     <div class="video-container">
         <div class="video-stage">
-            <video src="An underwater animation I made.mp4" id="video-custom-player" ></video>
+            <video src="An underwater animation I made.mp4" id="video-custom-player">
+                <track kind="captions" src="An underwater animation I made.vtt" srclang="en" label="English" default>
+            </video>
             <div class="video-overlay" id="video-overlay"></div>
             <img src="assets/Spinner@1x-1.0s-200px-200px.gif" class="video-loader" id="video-loader" width="70" height="70">
             <button class="replay" id="replay-button"><i class="fa-solid fa-rotate-right"></i></button>
@@ -78,6 +80,9 @@
                 <div id="more-options-menu" class="more-options-menu" role="group">
                     <button class="menu-option" type="button" id="download-btn">
                         <i class="fas fa-download" aria-hidden="true"></i> Download
+                    </button>
+                    <button class="menu-option" type="button" id="subtitles-btn">
+                        <i class="fas fa-closed-captioning" aria-hidden="true"></i> Subtitles
                     </button>
                 </div>
             </div>
