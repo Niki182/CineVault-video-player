@@ -102,13 +102,23 @@
             &lt;button class="more-options-btn" id="more-options-button" type="button" aria-label="More options" title="More options" aria-expanded="false" aria-controls="more-options-menu"&gt;
                 &lt;i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"&gt;&lt;/i&gt;
                 &lt;/button&gt;
-                &lt;div id="more-options-menu" class="more-options-menu" role="group" aria-label="Video options" hidden&gt;
-                    &lt;button class="menu-option" type="button" id="download-btn"&gt;
-                    &lt;i class="fas fa-download" aria-hidden="true"&gt;&lt;/i&gt; Download
-                &lt;/button&gt;
-                &lt;button class="menu-option" type="button" id="subtitles-btn"&gt;
-                    &lt;i class="fas fa-closed-captioning" aria-hidden="true"&gt;&lt;/i&gt; Subtitles
-                &lt;/button&gt;
+                &lt;div class="non-sub-stuff" id="non-sub-thing">
+                    &lt;div id="more-options-menu" class="more-options-menu" role="group" aria-label="Video options" hidden&gt;
+                        &lt;button class="menu-option" type="button" id="download-btn"&gt;
+                        &lt;i class="fas fa-download" aria-hidden="true"&gt;&lt;/i&gt; Download
+                    &lt;/button&gt;
+                &lt;div&gt;
+                &lt;div id="subtitles"&gt;
+                    &lt;button class="menu-option" type="button" id="prev-option-btn"&gt;
+                        &lt;i class="fa-solid fa-arrow-left" aria-hidden="true"&gt;&lt;/i&gt; Go back
+                    &lt;/button&gt;
+                    &lt;div class="sub-option"&gt;
+                        &lt;label class="menu-option" for="subtitle-language"&gt;Subtitle language&lt;/label&gt;
+                        &lt;select id="subtitle-language" class="menu-option" aria-label="Subtitle language" &gt;
+                            &lt;option value="en" selected&gt;English&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
             &lt;/div&gt;
         &lt;/div&gt;
     &lt;/div&gt;
