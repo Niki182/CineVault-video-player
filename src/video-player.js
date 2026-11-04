@@ -18,6 +18,24 @@ document.querySelectorAll('.video-container').forEach((container) => {
     const moreOptionsMenu = container.querySelector('#more-options-menu');
     const downloadButton = container.querySelector('#download-btn');
     const subtitlesButton = container.querySelector('#subtitles-btn');
+    const subtitleUI = container.querySelector('#subtitles');
+    const subtitleLanguage = container.querySelector('#subtitle-language');
+    const NonsubtitleLanguageLabel = container.querySelector('#non-sub-thing');
+    const previousButton = container.querySelector('#prev-option-btn');
+    
+    const revealSubtitleLanguageLabel = () => {
+        const languageSelector = container.querySelector('#subtitle-language');
+        const label = NonsubtitleLanguageLabel || container.querySelector('#non-sub-thing');
+        if (!languageSelector || !label) return false;
+        label.hidden = subtitleUI ? !subtitleUI.hidden : false;
+        return true;
+    };
+    if (!revealSubtitleLanguageLabel()) {
+        const subtitleLanguageObserver = new MutationObserver(() => {
+            if (revealSubtitleLanguageLabel()) subtitleLanguageObserver.disconnect();
+        });
+        subtitleLanguageObserver.observe(container, { childList: true, subtree: true });
+    }
 
     const controlsDisplay = customControls ? window.getComputedStyle(customControls).display : '';
     let customControlsVisible = customControls
@@ -37,7 +55,6 @@ document.querySelectorAll('.video-container').forEach((container) => {
     }
 
     if (fullScreenBtn) {
-        
         const fullscreenTarget = container;
         const originalFullscreenStyles = {
             containerDisplay: fullscreenTarget.style.display,
@@ -156,7 +173,6 @@ document.querySelectorAll('.video-container').forEach((container) => {
                 ? videoPlayer.currentTime / duration
                 : 0;
             if (!isSeeking) {
-                
                 seekSlider.value = String(min + progress * (max - min));
             }
             if (vidSlider) {
@@ -168,7 +184,6 @@ document.querySelectorAll('.video-container').forEach((container) => {
             }
         }
     };
-
 
     if (seekSlider) {
         seekSlider.addEventListener('input', () => {
@@ -250,7 +265,6 @@ document.querySelectorAll('.video-container').forEach((container) => {
                 ? '<i class="fas fa-play"></i>'
                 : '<i class="fas fa-pause"></i>';
         };
-        
 
         videoPlayer.addEventListener('play', updatePlayButton);
         videoPlayer.addEventListener('pause', updatePlayButton);
@@ -380,10 +394,11 @@ document.querySelectorAll('.video-container').forEach((container) => {
         videoContextMenu.appendChild(versionLabel);
         
         videoContextMenu.style.display = 'block';
-        
-        const bounds = videoContextMenu.getBoundingClientRect();
-        videoContextMenu.style.left = `${Math.max(0, Math.min(event.clientX, window.innerWidth - bounds.width))}px`;
-        videoContextMenu.style.top = `${Math.max(0, Math.min(event.clientY, window.innerHeight - bounds.height))}px`;
+        const menuRect = videoContextMenu.getBoundingClientRect();
+        const left = Math.max(0, Math.min(event.clientX, window.innerWidth - menuRect.width));
+        const top = Math.max(0, Math.min(event.clientY, window.innerHeight - menuRect.height));
+        videoContextMenu.style.left = `${left}px`;
+        videoContextMenu.style.top = `${top}px`;
     };
 
     videoPlayer.addEventListener('contextmenu', showVideoContextMenu);
@@ -419,7 +434,14 @@ document.querySelectorAll('.video-container').forEach((container) => {
     moreOptionsButton.setAttribute('aria-expanded', 'false');
 
     moreOptionsButton.addEventListener('click', () => {
-        setMoreOptionsMenuOpen(moreOptionsMenu.hidden);
+        const willBeOpen = moreOptionsMenu.hidden;
+        
+        if (willBeOpen) {
+            if (subtitleUI) subtitleUI.hidden = true;
+            if (NonsubtitleLanguageLabel) NonsubtitleLanguageLabel.hidden = false;
+        }
+
+        setMoreOptionsMenuOpen(willBeOpen);
     });
 
     document.addEventListener('keydown', (event) => {
@@ -450,35 +472,97 @@ document.querySelectorAll('.video-container').forEach((container) => {
         );
         return Boolean(trackElement && trackElement.src && /\.vtt(?:$|[?#])/i.test(trackElement.src));
     });
-    
+
+    const getTrackElement = (textTrack) => Array.from(videoPlayer.querySelectorAll('track')).find((track) =>
+        track.track === textTrack
+    );
+
+    const updateSubtitleLanguageOptions = (tracks) => {
+        if (!subtitleLanguage) return;
+        const selectedLanguage = subtitleLanguage.value;
+        const languages = new Map();
+        tracks.forEach((track) => {
+            const trackElement = getTrackElement(track);
+            const language = trackElement?.srclang.trim();
+            if (language && !languages.has(language)) {
+                languages.set(language, trackElement.label || language);
+            }
+        });
+
+        subtitleLanguage.replaceChildren(new Option('Off', '', true, true));
+        languages.forEach((label, language) => {
+            subtitleLanguage.add(new Option(label, language));
+        });
+
+        if (selectedLanguage && languages.has(selectedLanguage)) {
+            subtitleLanguage.value = selectedLanguage;
+        } else {
+            subtitleLanguage.value = '';
+        }
+    };
+
     const updateSubtitlesButton = () => {
-        if (!subtitlesButton) return;
         const tracks = getSubtitleTracks();
-        subtitlesButton.style.display = tracks.length > 0 ? '' : 'none';
-        subtitlesButton.disabled = tracks.length === 0;
-        const isShowing = tracks.some((track) => track.mode === 'showing');
-        subtitlesButton.setAttribute('aria-pressed', String(isShowing));
-        subtitlesButton.setAttribute('aria-label', isShowing ? 'Turn subtitles off' : 'Turn subtitles on');
+        updateSubtitleLanguageOptions(tracks);
+        
+        const activeTrack = tracks.find((track) => track.mode === 'showing');
+        const isShowing = Boolean(activeTrack);
+
+        if (subtitleLanguage) {
+            subtitleLanguage.value = activeTrack ? (getTrackElement(activeTrack)?.srclang || '') : '';
+        }
+
+        if (subtitlesButton) {
+            subtitlesButton.style.display = tracks.length > 0 ? '' : 'none';
+            subtitlesButton.disabled = tracks.length === 0;
+            
+            const subtitleIcon = document.createElement('i');
+            subtitleIcon.className = `fa-solid fa-closed-captioning`;
+            subtitleIcon.setAttribute('aria-hidden', 'true');
+            
+            const currentLangText = subtitleLanguage?.selectedOptions[0]?.textContent;
+            const labelText = isShowing && currentLangText && currentLangText !== 'Off'
+                ? ` Subtitles On: ${currentLangText}`
+                : ' Subtitles Off';
+
+            subtitlesButton.replaceChildren(subtitleIcon, document.createTextNode(labelText));
+        }
     };
 
     getSubtitleTracks().forEach((track) => {
         track.mode = 'disabled';
     });
+    if (subtitleLanguage) subtitleLanguage.value = '';
 
     if (subtitlesButton) {
         subtitlesButton.addEventListener('click', () => {
-            const tracks = getSubtitleTracks();
-            const shouldShow = !tracks.some((track) => track.mode === 'showing');
-            tracks.forEach((track) => {
-                track.mode = shouldShow ? 'showing' : 'disabled';
+            if (subtitleUI) subtitleUI.hidden = false;
+            if (NonsubtitleLanguageLabel) NonsubtitleLanguageLabel.hidden = true;
+        });
+    }
+
+    if (subtitleLanguage) {
+        subtitleLanguage.addEventListener('change', () => {
+            const selectedLanguage = subtitleLanguage.value;
+            getSubtitleTracks().forEach((track) => {
+                const trackLang = getTrackElement(track)?.srclang;
+                track.mode = (selectedLanguage && trackLang === selectedLanguage)
+                    ? 'showing'
+                    : 'disabled';
             });
             updateSubtitlesButton();
         });
-        videoPlayer.addEventListener('loadedmetadata', updateSubtitlesButton);
-        videoPlayer.textTracks.addEventListener('addtrack', updateSubtitlesButton);
-        videoPlayer.textTracks.addEventListener('change', updateSubtitlesButton);
-        updateSubtitlesButton();
     }
+
+    previousButton?.addEventListener('click', () => {
+        if (subtitleUI) subtitleUI.hidden = true;
+        if (NonsubtitleLanguageLabel) NonsubtitleLanguageLabel.hidden = false;
+    });
+
+    videoPlayer.addEventListener('loadedmetadata', updateSubtitlesButton);
+    videoPlayer.textTracks.addEventListener('addtrack', updateSubtitlesButton);
+    videoPlayer.textTracks.addEventListener('change', updateSubtitlesButton);
+    updateSubtitlesButton();
 
     videoPlayer.addEventListener('timeupdate', updateTimes);
     videoPlayer.addEventListener('loadedmetadata', updateTimes);
