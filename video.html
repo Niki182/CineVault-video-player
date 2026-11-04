@@ -78,12 +78,25 @@
                     <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
                 </button>
                 <div id="more-options-menu" class="more-options-menu" role="group">
-                    <button class="menu-option" type="button" id="download-btn">
-                        <i class="fas fa-download" aria-hidden="true"></i> Download
-                    </button>
-                    <button class="menu-option" type="button" id="subtitles-btn">
-                        <i class="fas fa-closed-captioning" aria-hidden="true"></i> Subtitles
-                    </button>
+                    <div class="non-sub-stuff" id="non-sub-thing">
+                        <button class="menu-option" type="button" id="download-btn">
+                            <i class="fas fa-download" aria-hidden="true"></i> Download
+                        </button>
+                        <button class="menu-option" type="button" id="subtitles-btn">
+                            <i class="fas fa-closed-captioning" aria-hidden="true"></i> Subtitles
+                        </button>
+                    </div>
+                    <div id="subtitles">
+                        <button class="menu-option" type="button" id="prev-option-btn">
+                            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Go back
+                        </button>
+                        <div class="sub-option">
+                            <label class="menu-option" for="subtitle-language">Subtitle language</label>
+                            <select id="subtitle-language" class="menu-option" aria-label="Subtitle language" >
+                                <option value="en" selected>English</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
