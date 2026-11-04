@@ -126,6 +126,10 @@
         max-width: 100%;
     }
 
+    .video-stage video {
+        width: 100%;
+    }
+
     .controls {
         flex-wrap: wrap;
         gap: 8px;
@@ -395,4 +399,77 @@
 
 .more-options-menu button:hover {
     background-color: #1a1a1a;
+}
+
+.sub-option {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    width: 100%;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sub-option:hover {
+    background-color: #1a1a1a;
+}
+
+.sub-option:focus-visible {
+    outline: 1px solid #3ea6ff;
+    outline-offset: -1px;
+}
+
+.sub-option i {
+    flex-shrink: 0;
+}
+
+.sub-option select {
+    margin-left: -1.5px;
+    background-color: #000;
+    color: #fff;
+    border: 1px solid grey;
+    padding: 2px 2px;
+    font: inherit;
+    cursor: pointer;
+}
+
+@media (max-width: 551.5px) {
+    .more-options-menu {
+        box-sizing: border-box;
+        width: min(280px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        min-width: 0;
+        max-height: 60vh;
+        overflow: visible;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        z-index: 10;
+        flex-wrap: wrap;
+    }
+
+    .more-options-menu::after {
+        content: "";
+        position: absolute;
+        left: 7px;
+        bottom: -10px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid #0b0b0b;
+    }
+
+    .more-options-menu button,
+    .sub-option {
+        min-height: 44px;
+        flex-wrap: wrap;
+    }
 }
