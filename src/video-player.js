@@ -465,73 +465,45 @@ document.querySelectorAll('.video-container').forEach((container) => {
         document.body.removeChild(link);
     });
 
-    const getSubtitleTracks = () => Array.from(videoPlayer.textTracks).filter((textTrack) => {
-        if (textTrack.kind !== 'subtitles' && textTrack.kind !== 'captions') return false;
-        const trackElement = Array.from(videoPlayer.querySelectorAll('track')).find((track) =>
-            track.track === textTrack
+    const getSubtitleTracks = () => Array.from(videoPlayer.querySelectorAll('track'))
+        .filter((trackElement) =>
+            (trackElement.kind === 'subtitles' || trackElement.kind === 'captions') &&
+            trackElement.hasAttribute('src')
         );
-        return Boolean(trackElement && trackElement.src && /\.vtt(?:$|[?#])/i.test(trackElement.src));
-    });
 
-    const getTrackElement = (textTrack) => Array.from(videoPlayer.querySelectorAll('track')).find((track) =>
-        track.track === textTrack
-    );
+    const getTrackLabel = (trackElement, index) =>
+        trackElement.label.trim() || trackElement.srclang.trim() || `Subtitle ${index + 1}`;
 
     const updateSubtitleLanguageOptions = (tracks) => {
         if (!subtitleLanguage) return;
-        const selectedLanguage = subtitleLanguage.value;
-        const languages = new Map();
-        tracks.forEach((track) => {
-            const trackElement = getTrackElement(track);
-            const language = trackElement?.srclang.trim();
-            if (language && !languages.has(language)) {
-                languages.set(language, trackElement.label || language);
-            }
+        const activeIndex = tracks.findIndex((trackElement) => trackElement.track.mode === 'showing');
+        subtitleLanguage.replaceChildren(new Option('Off', ''));
+        tracks.forEach((trackElement, index) => {
+            subtitleLanguage.add(new Option(getTrackLabel(trackElement, index), String(index)));
         });
-
-        subtitleLanguage.replaceChildren(new Option('Off', '', true, true));
-        languages.forEach((label, language) => {
-            subtitleLanguage.add(new Option(label, language));
-        });
-
-        if (selectedLanguage && languages.has(selectedLanguage)) {
-            subtitleLanguage.value = selectedLanguage;
-        } else {
-            subtitleLanguage.value = '';
-        }
+        subtitleLanguage.value = activeIndex >= 0 ? String(activeIndex) : '';
     };
 
     const updateSubtitlesButton = () => {
         const tracks = getSubtitleTracks();
+        const activeIndex = tracks.findIndex((trackElement) => trackElement.track.mode === 'showing');
         updateSubtitleLanguageOptions(tracks);
-        
-        const activeTrack = tracks.find((track) => track.mode === 'showing');
-        const isShowing = Boolean(activeTrack);
-
-        if (subtitleLanguage) {
-            subtitleLanguage.value = activeTrack ? (getTrackElement(activeTrack)?.srclang || '') : '';
-        }
 
         if (subtitlesButton) {
-            const hasTrackElement = videoPlayer.querySelector('track') !== null;
-            subtitlesButton.style.display = hasTrackElement ? '' : 'none';
+            subtitlesButton.style.display = tracks.length ? '' : 'none';
             subtitlesButton.disabled = tracks.length === 0;
-            
             const subtitleIcon = document.createElement('i');
-            subtitleIcon.className = `fa-solid fa-closed-captioning`;
+            subtitleIcon.className = 'fa-solid fa-closed-captioning';
             subtitleIcon.setAttribute('aria-hidden', 'true');
-            
-            const currentLangText = subtitleLanguage?.selectedOptions[0]?.textContent;
-            const labelText = isShowing && currentLangText && currentLangText !== 'Off'
-                ? ` Subtitles On: ${currentLangText}`
+            const labelText = activeIndex >= 0
+                ? ` Subtitles On: ${getTrackLabel(tracks[activeIndex], activeIndex)}`
                 : ' Subtitles Off';
-
             subtitlesButton.replaceChildren(subtitleIcon, document.createTextNode(labelText));
         }
     };
 
-    getSubtitleTracks().forEach((track) => {
-        track.mode = 'disabled';
+    getSubtitleTracks().forEach((trackElement) => {
+        trackElement.track.mode = 'disabled';
     });
     if (subtitleLanguage) subtitleLanguage.value = '';
 
@@ -544,10 +516,10 @@ document.querySelectorAll('.video-container').forEach((container) => {
 
     if (subtitleLanguage) {
         subtitleLanguage.addEventListener('change', () => {
-            const selectedLanguage = subtitleLanguage.value;
-            getSubtitleTracks().forEach((track) => {
-                const trackLang = getTrackElement(track)?.srclang;
-                track.mode = (selectedLanguage && trackLang === selectedLanguage)
+            const tracks = getSubtitleTracks();
+            const selectedIndex = Number(subtitleLanguage.value);
+            tracks.forEach((trackElement, index) => {
+                trackElement.track.mode = subtitleLanguage.value !== '' && index === selectedIndex
                     ? 'showing'
                     : 'disabled';
             });
@@ -563,6 +535,20 @@ document.querySelectorAll('.video-container').forEach((container) => {
     videoPlayer.addEventListener('loadedmetadata', updateSubtitlesButton);
     videoPlayer.textTracks.addEventListener('addtrack', updateSubtitlesButton);
     videoPlayer.textTracks.addEventListener('change', updateSubtitlesButton);
+    const subtitleTrackObserver = new MutationObserver((mutations) => {
+        if (mutations.some((mutation) =>
+            mutation.type === 'childList' ||
+            (mutation.target instanceof HTMLTrackElement && mutation.attributeName)
+        )) {
+            updateSubtitlesButton();
+        }
+    });
+    subtitleTrackObserver.observe(videoPlayer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src', 'kind', 'srclang', 'label']
+    });
     updateSubtitlesButton();
 
     videoPlayer.addEventListener('timeupdate', updateTimes);
