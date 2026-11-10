@@ -513,7 +513,8 @@ document.querySelectorAll('.video-container').forEach((container) => {
         }
 
         if (subtitlesButton) {
-            subtitlesButton.style.display = tracks.length > 0 ? '' : 'none';
+            const hasTrackElement = videoPlayer.querySelector('track') !== null;
+            subtitlesButton.style.display = hasTrackElement ? '' : 'none';
             subtitlesButton.disabled = tracks.length === 0;
             
             const subtitleIcon = document.createElement('i');
